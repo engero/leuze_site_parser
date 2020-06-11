@@ -5,7 +5,7 @@ import xlwt
 from bs4 import BeautifulSoup
 
 
-class Product():
+class Product:
     def __init__(self):
         self.payload = {
             'type': 'requestNewProductList',
@@ -15,7 +15,7 @@ class Product():
             'lang': 'eng',
         }
 
-    # Parsing links to product technical description on each page
+# Parsing links to product technical description on each page
     def _parse_links(self, number_of_pages=None):
         print('parsing links from %s...' % self.file_name)
         links = []
@@ -53,7 +53,7 @@ class Product():
             print('parsing links from %s ...%d%%' % (self.file_name, (current_page / number_of_pages * 100)))
         return links
 
-    # Parsing full technical description from each link
+# Parsing full technical description from each link
     def _parse_data(self, links):
         data = []
         i = 1
@@ -72,11 +72,13 @@ class Product():
                 'Article': article.text
             }
             for item in items:
-                # If same key already exist save to (key + 2)
-                j = 2
+                # If same key already exist save to (key + j)
                 if item.find('em', class_='title').text in d:
-                    d[item.find('em', class_='title').text + ' ' + str(j)] = item.find('span').text
-                    j += 1
+                    for j in range(2, len(items)):
+                        if item.find('em', class_='title').text + ' ' + str(j) in d:
+                            continue
+                        d[item.find('em', class_='title').text + ' ' + str(j)] = item.find('span').text
+                        break
                 else:
                     d[item.find('em', class_='title').text] = item.find('span').text
             i += 1
@@ -103,81 +105,3 @@ class Product():
         links = self._parse_links(number_of_pages)
         data = self._parse_data(links)
         self._save_to_excel(data)
-
-
-class PhotoSensor(Product):
-    def __init__(self):
-        Product.__init__(self)
-        self.file_name = 'photo_sensors'
-        self.product_url = 'http://www.leuze.de/en/deutschland/produkte/schaltende_sensoren/optische_sensoren/'
-        self.payload['grp_id'] = 'A1-1-1'
-        self.characteristics = ['Model',
-                                'Article',
-                                'Series',
-                                'Operating principle',
-                                'Operating range limit',
-                                'Supply voltage',
-                                'Light source',
-                                'Switching element',
-                                'Switching principle',
-                                'Switching element 2',
-                                'Switching principle 2',
-                                'Type',
-                                'Type of connection',
-                                'Thread size',
-                                'Housing material',
-                                'Design',
-                                'Degree of protection',
-                                'Application',
-                                'Operating range, white 90%']
-
-
-class InductiveSensor(Product):
-    def __init__(self):
-        Product.__init__(self)
-        self.file_name = 'inductive_sensors'
-        self.product_url = 'http://www.leuze.de/en/deutschland/produkte/schaltende_sensoren/induktive_sensoren/'
-        self.payload['grp_id'] = 'A1-1-2'
-        self.characteristics = ['Model',
-                                'Article',
-                                'Series',
-                                'Typ. operating range limit Sn',
-                                'Supply voltage',
-                                'Switching element',
-                                'Switching principle',
-                                'Switching element 2',
-                                'Switching principle 2',
-                                'Type of connection',
-                                'Thread size',
-                                'Thread size 2',
-                                'Housing material',
-                                'Dimension (Ø x L)',
-                                'Dimension (W x H x L)',
-                                'Design',
-                                'Type of installation',
-                                'Degree of protection']
-
-
-class CapacitiveSensor(Product):
-    def __init__(self):
-        Product.__init__(self)
-        self.file_name = 'capacitive_sensors'
-        self.product_url = 'http://www.leuze.de/en/deutschland/produkte/schaltende_sensoren/kapazitive_sensoren/'
-        self.payload['grp_id'] = '1488804867078'
-        self.characteristics = ['Model',
-                                'Article',
-                                'Series',
-                                'Assured switching distance',
-                                'Switching distance Sn (non-embedded installation)',
-                                'Supply voltage',
-                                'Switching element',
-                                'Switching principle',
-                                'Type of connection',
-                                'Thread size',
-                                'Thread size 2',
-                                'Housing material',
-                                'Dimension (Ø x L)',
-                                'Dimension (W x H x L)',
-                                'Design',
-                                'Type of installation',
-                                'Degree of protection']
